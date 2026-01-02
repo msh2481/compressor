@@ -1,11 +1,11 @@
 task:
-  n: 10
-  k: 5
+  n: 8
+  k: 8
   train_fraction: 0.8
   seed: 42
 
 model:
-  widths: [20, 20]
+  widths: [6, 6, 6, 6]
   activation: relu
 
 optimizer:
@@ -21,9 +21,9 @@ noise:
   K: 1
 
 training:
-  max_steps: 10000
-  eval_every: 10
-  patience: 1000
+  max_steps: 1000000
+  eval_every: 50
+  patience: 1000000
   batch_size: null
 
 logging:

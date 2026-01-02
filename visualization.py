@@ -162,6 +162,8 @@ def dashboard_figure(
     ax.legend()
     if train_losses and max(train_losses) > 0:
         ax.set_yscale("log")
+    if len(steps) > 1:
+        ax.set_xscale("log")
 
     # Top-right: Accuracy
     ax = axes[0, 1]
@@ -172,6 +174,8 @@ def dashboard_figure(
     ax.set_title("Accuracy")
     ax.legend()
     ax.set_ylim(0, 1.05)
+    if len(steps) > 1:
+        ax.set_xscale("log")
 
     # Bottom-left: Gradient norms
     ax = axes[1, 0]
@@ -185,6 +189,8 @@ def dashboard_figure(
     ax.legend(fontsize=8)
     if grad_norms and any(grad_norms.values()):
         ax.set_yscale("log")
+    if len(steps) > 1:
+        ax.set_xscale("log")
 
     # Bottom-right: Cosine similarity
     ax = axes[1, 1]
@@ -200,6 +206,8 @@ def dashboard_figure(
         ax.legend(fontsize=8)
     ax.set_ylim(-1.05, 1.05)
     ax.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
+    if len(cosine_steps) > 1:
+        ax.set_xscale("log")
 
     plt.tight_layout()
     return _fig_to_image(fig)
