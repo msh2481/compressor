@@ -1,0 +1,18 @@
+[project]
+name = "compressor"
+version = "0.1.0"
+description = "XOR representation learning experiments"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "cma>=4.4.1",
+    "hessianfree",
+    "matplotlib>=3.10.8",
+    "pytest>=9.0.2",
+    "pyyaml>=6.0.3",
+    "tensorboard>=2.20.0",
+    "torch>=2.9.1",
+]
+
+[tool.uv.sources]
+hessianfree = { git = "https://github.com/ltatzel/PyTorchHessianFree.git", rev = "main" }
