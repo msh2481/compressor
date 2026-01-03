@@ -5,7 +5,6 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 import cma
-from hessianfree.optimizer import HessianFree
 
 from config import OptimizerConfig
 
@@ -23,8 +22,6 @@ class OptimizerWrapper(ABC):
 
         Args:
             loss_fn: Callable that returns (loss, outputs).
-                     For Adam, outputs can be ignored.
-                     For HessianFree, outputs are required for GGN.
 
         Returns:
             Loss value as float.
@@ -110,50 +107,11 @@ class CMAESWrapper(OptimizerWrapper):
         return self.es.sigma
 
 
-class HessianFreeWrapper(OptimizerWrapper):
-    """Wrapper for PyTorchHessianFree optimizer."""
-
-    def __init__(
-        self,
-        model: nn.Module,
-        lr: float = 1.0,
-        damping: float = 1.0,
-        cg_max_iter: int = 50,
-    ):
-        self.model = model
-        self._lr = lr
-        self.optimizer = HessianFree(
-            model.parameters(),
-            lr=lr,
-            damping=damping,
-            cg_max_iter=cg_max_iter,
-            verbose=False,
-        )
-
-    def step(self, loss_fn: Callable[[], tuple[Tensor, Tensor]]) -> float:
-        # HessianFree needs a forward function that returns (loss, outputs)
-        def forward():
-            return loss_fn()
-
-        loss = self.optimizer.step(forward=forward)
-        return loss if isinstance(loss, float) else loss.item()
-
-    def get_lr(self) -> float:
-        return self._lr
-
-
 def create_optimizer(model: nn.Module, config: OptimizerConfig) -> OptimizerWrapper:
     """Factory function to create optimizer from config."""
     if config.type == "adam":
         return AdamWrapper(model, lr=config.lr)
     elif config.type == "cmaes":
         return CMAESWrapper(model, sigma0=config.sigma0)
-    elif config.type == "hessianfree":
-        return HessianFreeWrapper(
-            model,
-            lr=config.lr,
-            damping=config.damping,
-            cg_max_iter=config.cg_max_iter,
-        )
     else:
         raise ValueError(f"Unknown optimizer type: {config.type}")

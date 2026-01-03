@@ -28,11 +28,9 @@ def parse_args():
     parser.add_argument("--model.widths", type=str, help="Hidden layer widths, e.g. '[64,64]'")
     parser.add_argument("--model.activation", type=str, choices=["relu", "tanh", "sigmoid"])
 
-    parser.add_argument("--optimizer.type", type=str, choices=["adam", "cmaes", "hessianfree"])
+    parser.add_argument("--optimizer.type", type=str, choices=["adam", "cmaes"])
     parser.add_argument("--optimizer.lr", type=float)
     parser.add_argument("--optimizer.sigma0", type=float)
-    parser.add_argument("--optimizer.damping", type=float)
-    parser.add_argument("--optimizer.cg_max_iter", type=int)
 
     parser.add_argument("--noise.enabled", type=lambda x: x.lower() == "true")
     parser.add_argument("--noise.std", type=float)
@@ -74,10 +72,6 @@ def apply_overrides(config: Config, args: argparse.Namespace) -> Config:
         config.optimizer.lr = args.__dict__["optimizer.lr"]
     if args.__dict__.get("optimizer.sigma0") is not None:
         config.optimizer.sigma0 = args.__dict__["optimizer.sigma0"]
-    if args.__dict__.get("optimizer.damping") is not None:
-        config.optimizer.damping = args.__dict__["optimizer.damping"]
-    if args.__dict__.get("optimizer.cg_max_iter") is not None:
-        config.optimizer.cg_max_iter = args.__dict__["optimizer.cg_max_iter"]
 
     # Noise
     if args.__dict__.get("noise.enabled") is not None:

@@ -1,5 +1,7 @@
 from pathlib import Path
 from datetime import datetime
+import sys
+import select
 import torch
 import torch.nn as nn
 from torch import Tensor
@@ -11,6 +13,23 @@ from task import make_dataset
 from optimizers import OptimizerWrapper, create_optimizer
 from metrics import compute_correlations, GradientTracker, compute_accuracy
 from visualization import correlation_heatmap, dashboard_figure
+
+
+def check_keyboard_input() -> str | None:
+    """Non-blocking check for keyboard input. Returns key pressed or None."""
+    if select.select([sys.stdin], [], [], 0.0)[0]:
+        return sys.stdin.read(1)
+    return None
+
+
+def print_frozen_status(model: MLP) -> None:
+    """Print current frozen status of all layers."""
+    status = model.get_frozen_status()
+    status_str = " ".join(
+        f"L{i}:{'frozen' if frozen else 'active'}"
+        for i, frozen in enumerate(status)
+    )
+    print(f"  Layers: {status_str}")
 
 
 def add_noise_to_params(model: nn.Module, std: float) -> dict[str, Tensor]:
@@ -125,6 +144,9 @@ def train(config: Config, run_dir: Path | None = None) -> dict:
         widths=config.model.widths,
         activation=config.model.activation,
     )
+    num_layers = len(model.get_linear_layers())
+    print(f"Interactive controls: Press 0-{num_layers-1} to toggle layer freeze")
+    print_frozen_status(model)
 
     # Create optimizer
     optimizer = create_optimizer(model, config.optimizer)
@@ -157,6 +179,16 @@ def train(config: Config, run_dir: Path | None = None) -> dict:
 
     # Training loop
     for step in range(config.training.max_steps):
+        # Check for interactive layer freeze toggle
+        key = check_keyboard_input()
+        if key and key.isdigit():
+            layer_idx = int(key)
+            if layer_idx < num_layers:
+                is_frozen = model.toggle_layer(layer_idx)
+                status = "frozen" if is_frozen else "unfrozen"
+                print(f"\n  Layer {layer_idx} {status}")
+                print_frozen_status(model)
+
         # Optimization step
         if config.noise.enabled and config.noise.K > 1:
             train_loss = noise_averaged_step(

@@ -1,6 +1,6 @@
 task:
-  n: 8
-  k: 8
+  n: 5
+  k: 5
   train_fraction: 0.8
   seed: 42
 
@@ -13,12 +13,12 @@ optimizer:
   lr: 0.001
   sigma0: 1.0
   damping: 1.0
-  cg_max_iter: 50
+  cg_max_iter: 500
 
 noise:
-  enabled: false
-  std: 0.1
-  K: 1
+  enabled: true
+  std: 0.2
+  K: 100
 
 training:
   max_steps: 1000000

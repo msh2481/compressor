@@ -20,13 +20,10 @@ class ModelConfig:
 
 @dataclass
 class OptimizerConfig:
-    type: Literal["adam", "cmaes", "hessianfree"] = "adam"
+    type: Literal["adam", "cmaes"] = "adam"
     lr: float = 0.001
     # CMA-ES
     sigma0: float = 1.0
-    # HessianFree
-    damping: float = 1.0
-    cg_max_iter: int = 50
 
 
 @dataclass

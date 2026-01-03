@@ -60,6 +60,42 @@ class MLP(nn.Module):
     def num_params(self) -> int:
         return sum(p.numel() for p in self.parameters())
 
+    def get_linear_layers(self) -> list[nn.Linear]:
+        """Get all Linear layers (for freezing)."""
+        return [layer for layer in self.layers if isinstance(layer, nn.Linear)]
+
+    def freeze_layer(self, layer_idx: int) -> None:
+        """Freeze a specific linear layer by index."""
+        linear_layers = self.get_linear_layers()
+        if 0 <= layer_idx < len(linear_layers):
+            for param in linear_layers[layer_idx].parameters():
+                param.requires_grad = False
+
+    def unfreeze_layer(self, layer_idx: int) -> None:
+        """Unfreeze a specific linear layer by index."""
+        linear_layers = self.get_linear_layers()
+        if 0 <= layer_idx < len(linear_layers):
+            for param in linear_layers[layer_idx].parameters():
+                param.requires_grad = True
+
+    def toggle_layer(self, layer_idx: int) -> bool:
+        """Toggle freeze state of a layer. Returns new frozen state."""
+        linear_layers = self.get_linear_layers()
+        if 0 <= layer_idx < len(linear_layers):
+            layer = linear_layers[layer_idx]
+            is_frozen = not layer.weight.requires_grad
+            if is_frozen:
+                self.unfreeze_layer(layer_idx)
+                return False
+            else:
+                self.freeze_layer(layer_idx)
+                return True
+        return False
+
+    def get_frozen_status(self) -> list[bool]:
+        """Get frozen status for each linear layer."""
+        return [not layer.weight.requires_grad for layer in self.get_linear_layers()]
+
 
 def create_model(
     n: int,
